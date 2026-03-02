@@ -1,13 +1,14 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
 
-const RAW_DESIGNS_DIR = path.join(process.cwd(), 'src', '_raw_designs');
+/** Committed legal content used at build time (Vercel/deploy). Raw sources live in src/_raw_designs (gitignored). */
+const LEGAL_CONTENT_DIR = path.join(process.cwd(), 'src', 'content', 'legal');
 
 /**
- * Reads a markdown file from src/_raw_designs. Safe for server components.
+ * Reads a markdown file from src/content/legal. Safe for server components.
  */
 export async function readPolicyMarkdown(filename: string): Promise<string> {
-    const filePath = path.join(RAW_DESIGNS_DIR, filename);
+    const filePath = path.join(LEGAL_CONTENT_DIR, filename);
     const content = await readFile(filePath, 'utf-8');
     return content;
 }
