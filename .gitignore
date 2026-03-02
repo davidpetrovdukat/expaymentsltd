@@ -1,0 +1,61 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# ESLint output files (should not be committed)
+eslint.json
+eslint-report.*
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+.env.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# AI Orchestration Files
+.agent/
+PROJECT.md
+AI_PROMPTS.md
+
+# AI agent / IDE metadata (do not commit)
+.agent/
+.cursor/
+
+# Raw design sources (do not commit)
+src/_raw_designs/
+
+# Local-only project instructions
+INSTRUCTIONS.md
