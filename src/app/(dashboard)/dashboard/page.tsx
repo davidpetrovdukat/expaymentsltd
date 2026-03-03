@@ -40,11 +40,17 @@ export default async function DashboardPage() {
                             />
                         </Link>
 
-                        {/* User Area - MVP Placeholder elements */}
+                        {/* User Area - MVP Placeholder elements. Form POST avoids Link prefetch triggering GET /auth/signout. */}
                         <div className="flex items-center gap-6">
-                            <Link href="/auth/signout" className="flex items-center gap-2 text-slate-500 hover:text-red-500 transition-colors duration-200" title="Sign Out">
-                                <span className="text-sm font-semibold hidden sm:inline">Logout</span>
-                            </Link>
+                            <form method="post" action="/auth/signout" className="inline">
+                                <button
+                                    type="submit"
+                                    className="flex items-center gap-2 text-slate-500 hover:text-red-500 transition-colors duration-200 cursor-pointer bg-transparent border-none p-0 font-inherit text-sm font-semibold"
+                                    title="Sign Out"
+                                >
+                                    <span className="hidden sm:inline">Logout</span>
+                                </button>
+                            </form>
                             {/* Simple Avatar Placeholder */}
                             <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm ring-2 ring-white dark:ring-slate-800 shadow-sm">
                                 U
