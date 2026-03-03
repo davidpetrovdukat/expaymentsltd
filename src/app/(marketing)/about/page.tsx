@@ -51,10 +51,10 @@ export default function AboutUsPage() {
                             </div>
                             <div className="space-y-6 text-lg leading-relaxed text-slate-600 dark:text-slate-400">
                                 <p>
-                                    Traditional banking often struggles to keep pace with digital innovation. For high-growth global merchants, this gap creates unnecessary friction—delayed settlements, opaque compliance checks, and fragmented payment rails that stifle expansion.
+                                    Traditional banking often struggles to keep pace with digital innovation. For high-growth global merchants, this gap creates unnecessary friction delayed settlements, opaque compliance checks, and fragmented payment rails that stifle expansion.
                                 </p>
                                 <p>
-                                    At Ex-Payments, we believe stability is not just a feature—it is the foundation of growth. We built our infrastructure from the ground up to solve the specific volatility issues that plague modern commerce.
+                                    At Ex-Payments, we believe stability is not just a feature it is the foundation of growth. We built our infrastructure from the ground up to solve the specific volatility issues that plague modern commerce.
                                 </p>
                                 <p className="font-medium text-slate-900 dark:text-slate-200">
                                     By providing transparent, high-approval processing, we empower merchants to scale without the fear of sudden interruptions. We don&apos;t just process payments; we secure the lifeline of your business.

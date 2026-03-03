@@ -13,7 +13,7 @@
   7. On submit, the system generates a **PDF** of the submitted application and emails it to **compliance@ex-payments.com**.
 
 ## 2. 🏗 Architecture & Tech Stack (Strict)
-- **Core Framework:** Next.js 15 (App Router strictly)
+- **Core Framework:** Next.js 16 (pinned 16.1.6, App Router strictly)
 - **Language:** TypeScript (Strict mode enabled)
 - **Styling & UI:** Tailwind CSS + Shadcn/UI (Base)
 - **Animation:** Framer Motion + inline SVG micro-interactions (code-generated).

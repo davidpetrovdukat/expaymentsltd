@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
+import Link from 'next/link';
 import { Eye, Info, ArrowRight } from 'lucide-react';
 import { signUpAction } from '../actions';
 
@@ -110,7 +111,7 @@ export function SignUpForm() {
                 </div>
                 <div className="ml-3 text-sm">
                     <label className="font-normal text-slate-500 dark:text-slate-400" htmlFor="terms">
-                        I agree to the <span className="font-medium text-text-main dark:text-white cursor-not-allowed">Terms of Service</span> and <span className="font-medium text-text-main dark:text-white cursor-not-allowed">Privacy Policy</span>.
+                        I agree to the <Link href="/legal/terms-of-use" className="font-medium text-primary hover:underline focus:outline-none focus:underline">Terms of Use</Link> and <Link href="/legal/privacy-policy" className="font-medium text-primary hover:underline focus:outline-none focus:underline">Privacy Policy</Link>.
                     </label>
                 </div>
             </div>
