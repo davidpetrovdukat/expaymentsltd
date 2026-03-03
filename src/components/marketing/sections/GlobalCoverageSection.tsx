@@ -6,19 +6,14 @@ export function GlobalCoverageSection() {
         <section className="py-24 bg-background-subtle relative overflow-hidden">
             <div className="max-w-[80rem] mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
 
+                {/* Single map render: map is ONLY inside SVG via WorldMapSvgDynamic (no CSS background-image of world-map.svg). */}
                 <div className="relative min-h-[400px] w-full bg-slate-50 rounded-3xl overflow-hidden" aria-label="Stylized world map showing global connectivity nodes">
                     <div
                         className="absolute inset-0 opacity-20"
                         style={{ backgroundImage: 'radial-gradient(#cbd5e1 2px, transparent 2px)', backgroundSize: '20px 20px' }}
                     />
-                    {/* Single 2:1 box so overlay and map align (equirectangular) */}
                     <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="aspect-[2/1] w-full h-auto max-h-full relative">
-                            <div
-                                className="absolute inset-0 bg-center bg-cover bg-no-repeat opacity-30"
-                                style={{ backgroundImage: 'url(/world-map.svg)' }}
-                                aria-hidden
-                            />
+                        <div className="aspect-[2754/1398] w-full h-auto max-h-full relative">
                             <WorldMapSvgDynamic />
                         </div>
                     </div>

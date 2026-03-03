@@ -120,6 +120,7 @@ export default function WorldMapSvg() {
 
     const viewBox = `0 0 ${MAP_W} ${MAP_H}`;
 
+    /* Single map render path: only place world-map.svg is used (no CSS background elsewhere). */
     const mapImage = (
         <image
             href="/world-map.svg"
