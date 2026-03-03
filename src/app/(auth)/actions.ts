@@ -4,6 +4,12 @@ import { createClient } from '@/lib/supabase/server';
 import { publicEnv } from '@/lib/env/public';
 import { redirect } from 'next/navigation';
 
+/** Base URL without trailing slash, for building redirect URLs without double slashes. */
+function siteBaseUrl(): string {
+    const url = publicEnv.NEXT_PUBLIC_SITE_URL;
+    return url.replace(/\/+$/, '');
+}
+
 export async function loginAction(prevState: unknown, formData: FormData) {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
@@ -46,7 +52,7 @@ export async function signUpAction(prevState: unknown, formData: FormData) {
         email,
         password,
         options: {
-            emailRedirectTo: `${publicEnv.NEXT_PUBLIC_SITE_URL}/auth/callback?next=${encodeURIComponent('/login?verified=1')}`,
+            emailRedirectTo: `${siteBaseUrl()}/auth/callback?next=${encodeURIComponent('/auth/confirm')}`,
         },
     });
 
@@ -66,7 +72,7 @@ export async function forgotPasswordAction(prevState: unknown, formData: FormDat
 
     const supabase = await createClient();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${publicEnv.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/reset-password`,
+        redirectTo: `${siteBaseUrl()}/auth/callback?next=${encodeURIComponent('/reset-password')}`,
     });
 
     if (error) {
