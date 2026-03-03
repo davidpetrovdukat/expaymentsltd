@@ -12,6 +12,14 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
     try {
         const supabase = await createClient();
+
+        if (process.env.NODE_ENV !== 'production') {
+            const host = request.headers.get('host') ?? '(none)';
+            const hasSbCookies = request.cookies.getAll().some(c => c.name.startsWith('sb-'));
+            const { data: { user: debugUser } } = await supabase.auth.getUser();
+            console.log('[draft GET auth]', { host, hasSbCookies, userId: debugUser?.id?.slice(0, 8) ?? null });
+        }
+
         const userId = await getUserOrThrow(supabase);
 
         const applicationId = request.nextUrl.searchParams.get('applicationId');

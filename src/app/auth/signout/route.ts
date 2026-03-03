@@ -1,13 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { publicEnv } from '@/lib/env/public';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
     const supabase = await createClient();
 
-    // Sign out from Supabase (clears the session cookie)
     await supabase.auth.signOut();
 
-    // Redirect to login page
-    return NextResponse.redirect(new URL('/login', publicEnv.NEXT_PUBLIC_SITE_URL));
+    // Always redirect relative to the incoming request origin to avoid cross-origin redirects (www ↔ apex)
+    return NextResponse.redirect(new URL('/login', request.url));
 }

@@ -1,13 +1,23 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server';
-import { publicEnv } from '@/lib/env/public';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-/** Base URL without trailing slash, for building redirect URLs without double slashes. */
-function siteBaseUrl(): string {
-    const url = publicEnv.NEXT_PUBLIC_SITE_URL;
-    return url.replace(/\/+$/, '');
+/**
+ * Derives the origin from the incoming request headers so email redirect
+ * URLs always match the domain the user is visiting (www vs apex).
+ * Falls back to NEXT_PUBLIC_SITE_URL if the header is missing.
+ */
+async function siteBaseUrl(): Promise<string> {
+    const h = await headers();
+    const origin = h.get('origin') || h.get('x-forwarded-host') || h.get('host');
+    if (origin) {
+        const proto = h.get('x-forwarded-proto') || 'https';
+        const host = origin.replace(/^https?:\/\//, '');
+        return `${proto}://${host}`;
+    }
+    return (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ex-payments.com').replace(/\/+$/, '');
 }
 
 export async function loginAction(prevState: unknown, formData: FormData) {
@@ -52,7 +62,7 @@ export async function signUpAction(prevState: unknown, formData: FormData) {
         email,
         password,
         options: {
-            emailRedirectTo: `${siteBaseUrl()}/auth/callback?next=${encodeURIComponent('/auth/confirm')}`,
+            emailRedirectTo: `${await siteBaseUrl()}/auth/callback?next=${encodeURIComponent('/auth/confirm')}`,
         },
     });
 
@@ -72,7 +82,7 @@ export async function forgotPasswordAction(prevState: unknown, formData: FormDat
 
     const supabase = await createClient();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${siteBaseUrl()}/auth/callback?next=${encodeURIComponent('/reset-password')}`,
+        redirectTo: `${await siteBaseUrl()}/auth/callback?next=${encodeURIComponent('/reset-password')}`,
     });
 
     if (error) {
