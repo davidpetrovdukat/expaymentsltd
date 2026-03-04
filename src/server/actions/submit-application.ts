@@ -15,6 +15,7 @@ export interface Step5Fields {
 export interface SubmitResult {
     ok: boolean;
     error?: string;
+    applicationId?: string;
 }
 
 /**
@@ -52,7 +53,7 @@ export async function submitApplicationAction(step5: Step5Fields): Promise<Submi
     }
     if (row.status !== 'DRAFT') {
         // Already submitted — idempotent: treat as success so user reaches /success
-        return { ok: true };
+        return { ok: true, applicationId: row.id };
     }
 
     // ── 4. Validate required fields from all steps before submit ──────────────
@@ -107,7 +108,7 @@ export async function submitApplicationAction(step5: Step5Fields): Promise<Submi
         console.error('[submit] PDF/email pipeline error:', pdfOrEmailErr);
     }
 
-    return { ok: true };
+    return { ok: true, applicationId: updatedRow.id };
 }
 
 // ─── Validation ──────────────────────────────────────────────────────────────

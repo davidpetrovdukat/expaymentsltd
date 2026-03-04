@@ -96,7 +96,8 @@ function Step5Content() {
 
             const result = await submitApplicationAction({ title, first_name: firstName, last_name: lastName });
             if (result.ok) {
-                router.push('/application/success');
+                const query = result.applicationId ? `?applicationId=${encodeURIComponent(result.applicationId)}` : '';
+                router.push(`/application/success${query}`);
             } else {
                 setSubmitError(result.error ?? 'Submission failed. Please try again.');
             }

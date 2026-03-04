@@ -15,7 +15,12 @@ export const metadata: Metadata = {
     description: 'Your merchant account application has been submitted successfully.',
 };
 
-export default function SubmissionSuccessPage() {
+type Props = { searchParams: Promise<{ applicationId?: string }> };
+
+export default async function SubmissionSuccessPage({ searchParams }: Props) {
+    const params = await searchParams;
+    const applicationId = params.applicationId ?? null;
+
     return (
         <div className="bg-background-light dark:bg-slate-950 min-h-screen flex items-center justify-center p-4 antialiased text-slate-900 dark:text-slate-100 selection:bg-primary/20">
             <main className="w-full max-w-[640px] bg-white dark:bg-slate-900 rounded-2xl md:rounded-[24px] shadow-sm border border-slate-200 dark:border-slate-800 p-8 md:p-12 transition-all duration-300">
@@ -43,7 +48,7 @@ export default function SubmissionSuccessPage() {
                         <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
                             <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Application ID:</span>
                             <span className="text-sm font-bold font-mono text-slate-900 dark:text-white tracking-wide">
-                                PENDING-GENERATION
+                                {applicationId ?? '—'}
                             </span>
                         </div>
                         {/* Note: ID mocking is changed to indicate ungenerated backend ID for MVP purity */}
@@ -114,19 +119,21 @@ export default function SubmissionSuccessPage() {
                         <ArrowRight className="w-5 h-5 font-bold" />
                     </Link>
 
-                    <button
-                        className="w-full flex items-center justify-center gap-2 bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 h-14 rounded-full font-semibold text-[15px] transition-colors focus:outline-none"
-                    >
-                        <Download className="w-5 h-5" />
-                        <span>Download Application PDF</span>
-                    </button>
-
-                    <Link
-                        href="/"
-                        className="w-full flex items-center justify-center gap-2 mt-2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 text-sm font-medium transition-colors"
-                    >
-                        Return to Homepage
-                    </Link>
+                    {applicationId ? (
+                        <a
+                            href={`/api/application/pdf?applicationId=${encodeURIComponent(applicationId)}`}
+                            className="w-full flex items-center justify-center gap-2 bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 h-14 rounded-full font-semibold text-[15px] transition-colors focus:outline-none no-underline"
+                            download
+                        >
+                            <Download className="w-5 h-5" />
+                            <span>Download Application PDF</span>
+                        </a>
+                    ) : (
+                        <div className="w-full flex items-center justify-center gap-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500 h-14 rounded-full font-semibold text-[15px]">
+                            <Download className="w-5 h-5" />
+                            <span>Download Application PDF</span>
+                        </div>
+                    )}
                 </div>
             </main>
         </div>
