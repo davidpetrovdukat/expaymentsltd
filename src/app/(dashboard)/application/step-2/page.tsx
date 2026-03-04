@@ -65,7 +65,7 @@ function Step2Content() {
     const skipNextSaveRef = useRef(false);
     const isRestoredRef = useRef(false);
 
-    const { register, control, reset, setValue, handleSubmit, getValues, formState: { errors, isDirty } } = useForm<Step2FormData>({
+    const { register, control, reset, setValue, handleSubmit, getValues, formState: { errors } } = useForm<Step2FormData>({
         defaultValues: {
             'step2.activity_base': '',
             'step2.activity_sub': '',
@@ -161,7 +161,7 @@ function Step2Content() {
     }, [isLoading, initialData, reset, replaceStock, replaceSuppliers]);
 
     useEffect(() => {
-        if (!isHydrated || !isRestoredRef.current || !isDirty) return;
+        if (!isHydrated || !isRestoredRef.current) return;
         if (skipNextSaveRef.current) {
             skipNextSaveRef.current = false;
             return;
@@ -170,7 +170,7 @@ function Step2Content() {
         const stepPatch = Object.fromEntries(Object.entries(flatPatch).filter(([k]) => k.startsWith('step2.')));
         if (Object.keys(stepPatch).length === 0) return;
         autoSave(stepPatch, progressPercent);
-    }, [autoSaveValues, autoSave, progressPercent, isHydrated, isDirty]);
+    }, [autoSaveValues, autoSave, progressPercent, isHydrated]);
 
     function getErr(name: string): string | undefined {
         let obj: any = errors;
@@ -185,7 +185,13 @@ function Step2Content() {
         }
         handleSubmit(
             () => router.push('/application/step-3'),
-            () => {}
+            () => {
+                setTimeout(() => {
+                    const el = document.querySelector('.border-red-300');
+                    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 50);
+                window.alert('Please fill in all required fields before continuing.');
+            }
         )();
     }
 
@@ -707,7 +713,8 @@ function Step2Content() {
                     onBeforeNext={viewMode ? undefined : handleNext}
                     onSaveDraft={viewMode ? undefined : () => {
                         const flatPatch = flattenToDottedKeys(autoSaveValues as unknown as Record<string, unknown>);
-                        saveDraft(flatPatch, progressPercent);
+                        const stepPatch = Object.fromEntries(Object.entries(flatPatch).filter(([k]) => k.startsWith('step2.')));
+                        saveDraft(stepPatch, progressPercent);
                     }}
                     isSaving={isSaving}
                     hasSaved={!!lastSavedAt}

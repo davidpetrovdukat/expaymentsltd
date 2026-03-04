@@ -1,7 +1,7 @@
 'use client';
 
-import { Suspense, useEffect, useState, useRef } from 'react';
-import { useForm } from 'react-hook-form';
+import { Suspense, useEffect, useRef, useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
 import { useSearchParams } from 'next/navigation';
 import { StepProgress } from '@/components/application/StepProgress';
 import { StepActions } from '@/components/application/StepActions';
@@ -32,11 +32,10 @@ function Step5Content() {
     });
 
     const { initialData, isLoading, isSaving, lastSavedAt, error, autoSave, saveDraft, isHydrated } = useDraft(currentStep);
-    const [isRestored, setIsRestored] = useState(false);
     const skipNextSaveRef = useRef(false);
-    const isDirtyRef = useRef(false);
+    const isRestoredRef = useRef(false);
 
-    const { register, watch, reset, formState: { isDirty } } = useForm<Step5FormData>({
+    const { register, control, reset } = useForm<Step5FormData>({
         defaultValues: {
             'step5.title': '',
             'step5.first_name': '',
@@ -48,7 +47,6 @@ function Step5Content() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
 
-    // Restore draft values on load
     useEffect(() => {
         if (isLoading) return;
         const step5Data = Object.keys(initialData)
@@ -58,34 +56,27 @@ function Step5Content() {
                 return acc;
             }, {} as Partial<Step5FormData>);
         skipNextSaveRef.current = true;
+        isRestoredRef.current = true;
         reset(step5Data);
-        setIsRestored(true);
     }, [isLoading, initialData, reset]);
 
-    isDirtyRef.current = isDirty;
-
-    // Autosave listener — GATED on isRestored, isHydrated, isDirty; only step5.* keys
+    const autoSaveValues = useWatch({ control });
     useEffect(() => {
-        if (!isRestored || !isHydrated) return;
-        const subscription = watch((value) => {
-            if (!isDirtyRef.current) return;
-            if (skipNextSaveRef.current) {
-                skipNextSaveRef.current = false;
-                return;
-            }
-            const flatPatch = flattenToDottedKeys(value as unknown as Record<string, unknown>);
-            const stepPatch = Object.fromEntries(Object.entries(flatPatch).filter(([k]) => k.startsWith('step5.')));
-            if (Object.keys(stepPatch).length === 0) return;
-            autoSave(stepPatch, progressPercent);
-        });
-        return () => subscription.unsubscribe();
-    }, [watch, autoSave, progressPercent, isRestored, isHydrated]);
+        if (!isHydrated || !isRestoredRef.current) return;
+        if (skipNextSaveRef.current) {
+            skipNextSaveRef.current = false;
+            return;
+        }
+        const flatPatch = flattenToDottedKeys(autoSaveValues as unknown as Record<string, unknown>);
+        const stepPatch = Object.fromEntries(Object.entries(flatPatch).filter(([k]) => k.startsWith('step5.')));
+        if (Object.keys(stepPatch).length === 0) return;
+        autoSave(stepPatch, progressPercent);
+    }, [autoSaveValues, autoSave, progressPercent, isHydrated]);
 
     async function handleSignAndFinish() {
         setSubmitError(null);
-        const values = watch();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const step5 = (values as any)?.step5 ?? {};
+        const step5 = (autoSaveValues as any)?.step5 ?? {};
         const title = (step5.title as string)?.trim() ?? '';
         const firstName = (step5.first_name as string)?.trim() ?? '';
         const lastName = (step5.last_name as string)?.trim() ?? '';
@@ -97,7 +88,7 @@ function Step5Content() {
 
         setIsSubmitting(true);
         try {
-            const flatPatch = flattenToDottedKeys(values as unknown as Record<string, unknown>);
+            const flatPatch = flattenToDottedKeys(autoSaveValues as unknown as Record<string, unknown>);
             const stepPatch = Object.fromEntries(Object.entries(flatPatch).filter(([k]) => k.startsWith('step5.')));
             saveDraft(stepPatch, progressPercent);
 
@@ -115,7 +106,7 @@ function Step5Content() {
         }
     }
 
-    if (isLoading || !isRestored) {
+    if (isLoading) {
         return (
             <div className="flex flex-col items-center justify-center py-20 min-h-[50vh]">
                 <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
@@ -321,8 +312,9 @@ function Step5Content() {
                         onSubmit={viewMode ? undefined : handleSignAndFinish}
                         isSubmitting={isSubmitting}
                         onSaveDraft={viewMode ? undefined : () => {
-                            const flatPatch = flattenToDottedKeys(watch() as unknown as Record<string, unknown>);
-                            saveDraft(flatPatch, progressPercent);
+                            const flatPatch = flattenToDottedKeys(autoSaveValues as unknown as Record<string, unknown>);
+                            const stepPatch = Object.fromEntries(Object.entries(flatPatch).filter(([k]) => k.startsWith('step5.')));
+                            saveDraft(stepPatch, progressPercent);
                         }}
                         isSaving={isSaving}
                         hasSaved={!!lastSavedAt}
