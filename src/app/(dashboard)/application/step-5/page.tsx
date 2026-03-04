@@ -34,8 +34,9 @@ function Step5Content() {
     const { initialData, isLoading, isSaving, lastSavedAt, error, autoSave, saveDraft, isHydrated } = useDraft(currentStep);
     const [isRestored, setIsRestored] = useState(false);
     const skipNextSaveRef = useRef(false);
+    const isDirtyRef = useRef(false);
 
-    const { register, watch, reset } = useForm<Step5FormData>({
+    const { register, watch, reset, formState: { isDirty } } = useForm<Step5FormData>({
         defaultValues: {
             'step5.title': '',
             'step5.first_name': '',
@@ -61,16 +62,21 @@ function Step5Content() {
         setIsRestored(true);
     }, [isLoading, initialData, reset]);
 
-    // Autosave listener — GATED on isHydrated to prevent sending empty defaults
+    isDirtyRef.current = isDirty;
+
+    // Autosave listener — GATED on isRestored, isHydrated, isDirty; only step5.* keys
     useEffect(() => {
         if (!isRestored || !isHydrated) return;
         const subscription = watch((value) => {
+            if (!isDirtyRef.current) return;
             if (skipNextSaveRef.current) {
                 skipNextSaveRef.current = false;
                 return;
             }
             const flatPatch = flattenToDottedKeys(value as unknown as Record<string, unknown>);
-            autoSave(flatPatch, progressPercent);
+            const stepPatch = Object.fromEntries(Object.entries(flatPatch).filter(([k]) => k.startsWith('step5.')));
+            if (Object.keys(stepPatch).length === 0) return;
+            autoSave(stepPatch, progressPercent);
         });
         return () => subscription.unsubscribe();
     }, [watch, autoSave, progressPercent, isRestored, isHydrated]);
@@ -92,7 +98,8 @@ function Step5Content() {
         setIsSubmitting(true);
         try {
             const flatPatch = flattenToDottedKeys(values as unknown as Record<string, unknown>);
-            saveDraft(flatPatch, progressPercent);
+            const stepPatch = Object.fromEntries(Object.entries(flatPatch).filter(([k]) => k.startsWith('step5.')));
+            saveDraft(stepPatch, progressPercent);
 
             const result = await submitApplicationAction({ title, first_name: firstName, last_name: lastName });
             if (result.ok) {

@@ -149,6 +149,7 @@ export function useDraft(currentStep: number) {
     const performSave = useCallback(async (patch: Record<string, unknown>, progressPercent: number) => {
         if (!isHydratedRef.current) return;
         if (statusRef.current && statusRef.current !== 'DRAFT') return;
+        if (Object.keys(patch).length === 0) return;
 
         setState(s => ({ ...s, isSaving: true, error: null }));
         try {

@@ -63,8 +63,9 @@ function Step2Content() {
     const router = useRouter();
     const { initialData, isLoading, isSaving, lastSavedAt, error, autoSave, saveDraft, isHydrated, status } = useDraft(currentStep);
     const skipNextSaveRef = useRef(false);
+    const isRestoredRef = useRef(false);
 
-    const { register, control, reset, setValue, handleSubmit, getValues, formState: { errors } } = useForm<Step2FormData>({
+    const { register, control, reset, setValue, handleSubmit, getValues, formState: { errors, isDirty } } = useForm<Step2FormData>({
         defaultValues: {
             'step2.activity_base': '',
             'step2.activity_sub': '',
@@ -149,6 +150,7 @@ function Step2Content() {
         }
 
         skipNextSaveRef.current = true;
+        isRestoredRef.current = true;
         reset(step2Data);
 
         const restoredStock = step2Data['step2.stock_locations'] as any[] ?? [];
@@ -159,14 +161,16 @@ function Step2Content() {
     }, [isLoading, initialData, reset, replaceStock, replaceSuppliers]);
 
     useEffect(() => {
-        if (!isHydrated) return;
+        if (!isHydrated || !isRestoredRef.current || !isDirty) return;
         if (skipNextSaveRef.current) {
             skipNextSaveRef.current = false;
             return;
         }
         const flatPatch = flattenToDottedKeys(autoSaveValues as unknown as Record<string, unknown>);
-        autoSave(flatPatch, progressPercent);
-    }, [autoSaveValues, autoSave, progressPercent, isHydrated]);
+        const stepPatch = Object.fromEntries(Object.entries(flatPatch).filter(([k]) => k.startsWith('step2.')));
+        if (Object.keys(stepPatch).length === 0) return;
+        autoSave(stepPatch, progressPercent);
+    }, [autoSaveValues, autoSave, progressPercent, isHydrated, isDirty]);
 
     function getErr(name: string): string | undefined {
         let obj: any = errors;

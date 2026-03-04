@@ -53,6 +53,7 @@ function Step3Content() {
 
     const { initialData, isLoading, isSaving, lastSavedAt, error, autoSave, saveDraft, isHydrated, status } = useDraft(currentStep);
     const skipNextSaveRef = useRef(false);
+    const isRestoredRef = useRef(false);
 
     const forecastDefaults: Record<string, string> = {};
     FORECAST_ROWS.forEach(row => {
@@ -61,7 +62,7 @@ function Step3Content() {
         });
     });
 
-    const { register, control, reset, handleSubmit, formState: { errors } } = useForm<Step3FormData>({
+    const { register, control, reset, handleSubmit, formState: { errors, isDirty } } = useForm<Step3FormData>({
         defaultValues: {
             'step3.target_markets': [],
             'step3.processing_currencies': [],
@@ -93,20 +94,23 @@ function Step3Content() {
                 return acc;
             }, {} as Partial<Step3FormData>);
         skipNextSaveRef.current = true;
+        isRestoredRef.current = true;
         reset(step3Data);
     }, [isLoading, initialData, reset]);
 
     // useWatch is React Compiler-compatible; avoids the watch(callback) subscription pattern
     const autoSaveValues = useWatch({ control });
     useEffect(() => {
-        if (!isHydrated) return;
+        if (!isHydrated || !isRestoredRef.current || !isDirty) return;
         if (skipNextSaveRef.current) {
             skipNextSaveRef.current = false;
             return;
         }
         const flatPatch = flattenToDottedKeys(autoSaveValues as unknown as Record<string, unknown>);
-        autoSave(flatPatch, progressPercent);
-    }, [autoSaveValues, autoSave, progressPercent, isHydrated]);
+        const stepPatch = Object.fromEntries(Object.entries(flatPatch).filter(([k]) => k.startsWith('step3.')));
+        if (Object.keys(stepPatch).length === 0) return;
+        autoSave(stepPatch, progressPercent);
+    }, [autoSaveValues, autoSave, progressPercent, isHydrated, isDirty]);
 
     function handleNext() {
         if (status && status !== 'DRAFT') {

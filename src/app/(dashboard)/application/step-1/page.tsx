@@ -44,8 +44,9 @@ function Step1Content() {
 
     const { initialData, isLoading, isSaving, lastSavedAt, error, autoSave, saveDraft, isHydrated, status } = useDraft(currentStep);
     const skipNextSaveRef = useRef(false);
+    const isRestoredRef = useRef(false);
 
-    const { register, control, reset, handleSubmit, formState: { errors } } = useForm<Step1FormData>({
+    const { register, control, reset, handleSubmit, formState: { errors, isDirty } } = useForm<Step1FormData>({
         defaultValues: {
             'step1.company_name': '',
             'step1.company_number': '',
@@ -87,20 +88,23 @@ function Step1Content() {
             }, {} as Partial<Step1FormData>);
 
         skipNextSaveRef.current = true;
+        isRestoredRef.current = true;
         reset(step1Data);
     }, [isLoading, initialData, reset]);
 
     // useWatch is React Compiler-compatible; avoids the watch(callback) subscription pattern
     const autoSaveValues = useWatch({ control });
     useEffect(() => {
-        if (!isHydrated) return;
+        if (!isHydrated || !isRestoredRef.current || !isDirty) return;
         if (skipNextSaveRef.current) {
             skipNextSaveRef.current = false;
             return;
         }
         const flatPatch = flattenToDottedKeys(autoSaveValues as unknown as Record<string, unknown>);
-        autoSave(flatPatch, progressPercent);
-    }, [autoSaveValues, autoSave, progressPercent, isHydrated]);
+        const stepPatch = Object.fromEntries(Object.entries(flatPatch).filter(([k]) => k.startsWith('step1.')));
+        if (Object.keys(stepPatch).length === 0) return;
+        autoSave(stepPatch, progressPercent);
+    }, [autoSaveValues, autoSave, progressPercent, isHydrated, isDirty]);
 
     function handleNext() {
         if (status && status !== 'DRAFT') {

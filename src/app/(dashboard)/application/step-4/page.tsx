@@ -124,8 +124,9 @@ function Step4Content() {
 
     const { initialData, isLoading, isSaving, lastSavedAt, error, autoSave, saveDraft, isHydrated, status } = useDraft(currentStep);
     const skipNextSaveRef = useRef(false);
+    const isRestoredRef = useRef(false);
 
-    const { register, control, reset, setValue, handleSubmit, setError, clearErrors, getValues, formState: { errors } } = useForm<Step4FormData>({
+    const { register, control, reset, setValue, handleSubmit, setError, clearErrors, getValues, formState: { errors, isDirty } } = useForm<Step4FormData>({
         defaultValues: {
             'step4.persons': [{ ...DEFAULT_PERSON }],
         }
@@ -159,6 +160,7 @@ function Step4Content() {
         }
 
         skipNextSaveRef.current = true;
+        isRestoredRef.current = true;
         reset(step4Data);
 
         const restoredPersons = (step4Data['step4.persons'] as Person[]) ?? [{ ...DEFAULT_PERSON }];
@@ -177,14 +179,16 @@ function Step4Content() {
     // useWatch is React Compiler-compatible; avoids the watch(callback) subscription pattern
     const autoSaveValues = useWatch({ control });
     useEffect(() => {
-        if (!isHydrated) return;
+        if (!isHydrated || !isRestoredRef.current || !isDirty) return;
         if (skipNextSaveRef.current) {
             skipNextSaveRef.current = false;
             return;
         }
         const flatPatch = flattenToDottedKeys(autoSaveValues as unknown as Record<string, unknown>);
-        autoSave(flatPatch, progressPercent);
-    }, [autoSaveValues, autoSave, progressPercent, isHydrated]);
+        const stepPatch = Object.fromEntries(Object.entries(flatPatch).filter(([k]) => k.startsWith('step4.')));
+        if (Object.keys(stepPatch).length === 0) return;
+        autoSave(stepPatch, progressPercent);
+    }, [autoSaveValues, autoSave, progressPercent, isHydrated, isDirty]);
 
     function pErr(personIdx: number, field: string): string | undefined {
         const personErrors = (errors as any)?.step4?.persons?.[personIdx];
