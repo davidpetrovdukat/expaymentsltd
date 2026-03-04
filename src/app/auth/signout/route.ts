@@ -9,9 +9,9 @@ export async function GET() {
     });
 }
 
-/** Sign out only on explicit POST (e.g. form submit). Redirect uses request origin (no NEXT_PUBLIC_SITE_URL). */
+/** Sign out only on explicit POST (e.g. form submit). Redirect to homepage with 303 (See Other) so browser follows with GET. */
 export async function POST(request: NextRequest) {
     const supabase = await createClient();
     await supabase.auth.signOut();
-    return NextResponse.redirect(new URL('/login', request.url));
+    return NextResponse.redirect(new URL('/', request.url), 303);
 }
