@@ -36,7 +36,7 @@ function Step5Content() {
     const skipNextSaveRef = useRef(false);
     const isRestoredRef = useRef(false);
 
-    const { register, control, reset } = useForm<Step5FormData>({
+    const { register, control, reset, getValues } = useForm<Step5FormData>({
         defaultValues: {
             'step5.title': '',
             'step5.first_name': '',
@@ -76,8 +76,9 @@ function Step5Content() {
 
     async function handleSignAndFinish() {
         setSubmitError(null);
+        const currentValues = getValues();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const step5 = (autoSaveValues as any)?.step5 ?? {};
+        const step5 = (currentValues as any)?.step5 ?? {};
         const title = (step5.title as string)?.trim() ?? '';
         const firstName = (step5.first_name as string)?.trim() ?? '';
         const lastName = (step5.last_name as string)?.trim() ?? '';

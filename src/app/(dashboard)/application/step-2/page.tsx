@@ -2,7 +2,7 @@
 'use client';
 
 import { Suspense, useEffect, useRef } from 'react';
-import { useForm, useFieldArray, useWatch } from 'react-hook-form';
+import { useForm, useFieldArray, useWatch, Controller } from 'react-hook-form';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { StepProgress } from '@/components/application/StepProgress';
 import { FormSection } from '@/components/application/FormSection';
@@ -118,17 +118,7 @@ function Step2Content() {
         name: 'step2.suppliers'
     });
 
-    // useWatch is React Compiler-compatible; avoids the watch(callback) subscription pattern
     const autoSaveValues = useWatch({ control });
-    // Reactive states for toggles — derived from useWatch to avoid incompatible watch(field) calls
-    const s2 = (autoSaveValues as any)?.step2 ?? {};
-    const isLicensed = Boolean(s2.is_licensed);
-    const hasSubscription = Boolean(s2.has_subscription);
-    const hasCountryRestrictions = Boolean(s2.has_country_restrictions);
-    const usesOwnGateway = Boolean(s2.uses_own_gateway);
-    const hasOwnStock = Boolean(s2.has_own_stock);
-    const hasCustomerIdentification = Boolean(s2.has_customer_identification);
-    const hasCancellationPolicy = Boolean(s2.has_cancellation_policy);
 
     // Restore draft values on load
     useEffect(() => {
@@ -399,17 +389,21 @@ function Step2Content() {
                     <FormSection title="Compliance &amp; Operations" badge="Required">
 
                         {/* Toggle 1: Licensing */}
-                        <ToggleField
-                            label="Additionally licensing or authorization is required to sell goods/provide services"
-                            checked={isLicensed}
-                            onCheckedChange={(val) => {
-                                setValue('step2.is_licensed' as any, val);
-                                if (!val) {
-                                    setValue('step2.license_number' as any, '');
-                                    setValue('step2.license_issue_date' as any, '');
-                                }
-                            }}
-                        >
+                        <Controller
+                            control={control}
+                            name={'step2.is_licensed' as any}
+                            render={({ field: { value, onChange } }) => (
+                            <ToggleField
+                                label="Additionally licensing or authorization is required to sell goods/provide services"
+                                checked={!!value}
+                                onCheckedChange={(val) => {
+                                    onChange(val);
+                                    if (!val) {
+                                        setValue('step2.license_number' as any, '');
+                                        setValue('step2.license_issue_date' as any, '');
+                                    }
+                                }}
+                            >
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <label className="block">
                                     <span className="text-slate-500 text-xs font-medium mb-1.5 block uppercase tracking-wide">
@@ -433,19 +427,25 @@ function Step2Content() {
                                     />
                                 </label>
                             </div>
-                        </ToggleField>
+                            </ToggleField>
+                            )}
+                        />
 
                         <div className="border-t border-slate-100 pt-4" />
 
                         {/* Toggle 2: Subscription */}
-                        <ToggleField
-                            label="Are there any subscription products/services offered?"
-                            checked={hasSubscription}
-                            onCheckedChange={(val) => {
-                                setValue('step2.has_subscription' as any, val);
-                                if (!val) setValue('step2.subscription_terms_url' as any, '');
-                            }}
-                        >
+                        <Controller
+                            control={control}
+                            name={'step2.has_subscription' as any}
+                            render={({ field: { value, onChange } }) => (
+                            <ToggleField
+                                label="Are there any subscription products/services offered?"
+                                checked={!!value}
+                                onCheckedChange={(val) => {
+                                    onChange(val);
+                                    if (!val) setValue('step2.subscription_terms_url' as any, '');
+                                }}
+                            >
                             <label className="block">
                                 <span className="text-slate-500 text-xs font-medium mb-1.5 block uppercase tracking-wide">
                                     URL Address with Subscription Terms
@@ -457,19 +457,25 @@ function Step2Content() {
                                     type="url"
                                 />
                             </label>
-                        </ToggleField>
+                            </ToggleField>
+                            )}
+                        />
 
                         <div className="border-t border-slate-100 pt-4" />
 
                         {/* Toggle 3: Country Restrictions */}
-                        <ToggleField
-                            label="Do you have restrictions/URL access blocking from certain countries?"
-                            checked={hasCountryRestrictions}
-                            onCheckedChange={(val) => {
-                                setValue('step2.has_country_restrictions' as any, val);
-                                if (!val) setValue('step2.restricted_countries' as any, []);
-                            }}
-                        >
+                        <Controller
+                            control={control}
+                            name={'step2.has_country_restrictions' as any}
+                            render={({ field: { value, onChange } }) => (
+                            <ToggleField
+                                label="Do you have restrictions/URL access blocking from certain countries?"
+                                checked={!!value}
+                                onCheckedChange={(val) => {
+                                    onChange(val);
+                                    if (!val) setValue('step2.restricted_countries' as any, []);
+                                }}
+                            >
                             <label className="block">
                                 <span className="text-slate-500 text-xs font-medium mb-1.5 block uppercase tracking-wide">
                                     Restricted Countries
@@ -486,30 +492,40 @@ function Step2Content() {
                                 </select>
                                 <p className="text-xs text-slate-400 mt-1">Hold Ctrl/Cmd to select multiple</p>
                             </label>
-                        </ToggleField>
+                            </ToggleField>
+                            )}
+                        />
 
                         <div className="border-t border-slate-100 pt-4" />
 
                         {/* Toggle 4: Own Payment Gateway */}
-                        <ToggleField
-                            label="Will you be using your own payment gateway?"
-                            checked={usesOwnGateway}
-                            onCheckedChange={(val) => {
-                                setValue('step2.uses_own_gateway' as any, val);
-                            }}
+                        <Controller
+                            control={control}
+                            name={'step2.uses_own_gateway' as any}
+                            render={({ field: { value, onChange } }) => (
+                            <ToggleField
+                                label="Will you be using your own payment gateway?"
+                                checked={!!value}
+                                onCheckedChange={onChange}
+                            />
+                            )}
                         />
 
                         <div className="border-t border-slate-100 pt-4" />
 
                         {/* Toggle 5: Own Goods Stock */}
-                        <ToggleField
-                            label="Do you have your own goods stock?"
-                            checked={hasOwnStock}
-                            onCheckedChange={(val) => {
-                                setValue('step2.has_own_stock' as any, val);
-                                if (!val) setValue('step2.stock_locations' as any, []);
-                            }}
-                        >
+                        <Controller
+                            control={control}
+                            name={'step2.has_own_stock' as any}
+                            render={({ field: { value, onChange } }) => (
+                            <ToggleField
+                                label="Do you have your own goods stock?"
+                                checked={!!value}
+                                onCheckedChange={(val) => {
+                                    onChange(val);
+                                    if (!val) setValue('step2.stock_locations' as any, []);
+                                }}
+                            >
                             <div className="space-y-3">
                                 {stockLocations.map((field, index) => (
                                     <div key={field.id} className="grid grid-cols-12 gap-3 items-end">
@@ -578,19 +594,25 @@ function Step2Content() {
                                     Add location
                                 </button>
                             </div>
-                        </ToggleField>
+                            </ToggleField>
+                            )}
+                        />
 
                         <div className="border-t border-slate-100 pt-4" />
 
                         {/* Toggle 6: Customer Identification */}
-                        <ToggleField
-                            label="Do you identify customers at delivery times?"
-                            checked={hasCustomerIdentification}
-                            onCheckedChange={(val) => {
-                                setValue('step2.has_customer_identification' as any, val);
-                                if (!val) setValue('step2.identification_details' as any, '');
-                            }}
-                        >
+                        <Controller
+                            control={control}
+                            name={'step2.has_customer_identification' as any}
+                            render={({ field: { value, onChange } }) => (
+                            <ToggleField
+                                label="Do you identify customers at delivery times?"
+                                checked={!!value}
+                                onCheckedChange={(val) => {
+                                    onChange(val);
+                                    if (!val) setValue('step2.identification_details' as any, '');
+                                }}
+                            >
                             <label className="block">
                                 <span className="text-slate-500 text-xs font-medium mb-1.5 block uppercase tracking-wide">
                                     Details of Identification
@@ -602,19 +624,25 @@ function Step2Content() {
                                     rows={2}
                                 />
                             </label>
-                        </ToggleField>
+                            </ToggleField>
+                            )}
+                        />
 
                         <div className="border-t border-slate-100 pt-4" />
 
                         {/* Toggle 7: Cancellation */}
-                        <ToggleField
-                            label="Can customers cancel orders before delivery?"
-                            checked={hasCancellationPolicy}
-                            onCheckedChange={(val) => {
-                                setValue('step2.has_cancellation_policy' as any, val);
-                                if (!val) setValue('step2.cancellation_policy' as any, '');
-                            }}
-                        >
+                        <Controller
+                            control={control}
+                            name={'step2.has_cancellation_policy' as any}
+                            render={({ field: { value, onChange } }) => (
+                            <ToggleField
+                                label="Can customers cancel orders before delivery?"
+                                checked={!!value}
+                                onCheckedChange={(val) => {
+                                    onChange(val);
+                                    if (!val) setValue('step2.cancellation_policy' as any, '');
+                                }}
+                            >
                             <label className="block">
                                 <span className="text-slate-500 text-xs font-medium mb-1.5 block uppercase tracking-wide">
                                     Cancellation Deadline &amp; Refund Policy
@@ -626,7 +654,9 @@ function Step2Content() {
                                     rows={2}
                                 />
                             </label>
-                        </ToggleField>
+                            </ToggleField>
+                            )}
+                        />
                     </FormSection>
                 </div>
 
