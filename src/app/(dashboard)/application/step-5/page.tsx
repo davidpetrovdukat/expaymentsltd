@@ -18,6 +18,7 @@ interface Step5FormData {
 }
 
 function Step5Content() {
+    "use no memo";
     const currentStep = 5;
     const progressPercent = 80;
     const searchParams = useSearchParams();

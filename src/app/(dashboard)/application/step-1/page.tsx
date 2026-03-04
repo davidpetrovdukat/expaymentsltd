@@ -34,6 +34,7 @@ interface Step1FormData {
 const R = { required: 'Required' } as const;
 
 function Step1Content() {
+    "use no memo";
     const currentStep = 1;
     const progressPercent = 0;
     const router = useRouter();

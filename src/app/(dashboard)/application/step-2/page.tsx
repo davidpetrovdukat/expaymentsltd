@@ -53,6 +53,7 @@ interface Step2FormData {
 }
 
 function Step2Content() {
+    "use no memo";
     const currentStep = 2;
     const progressPercent = 20;
     const searchParams = useSearchParams();

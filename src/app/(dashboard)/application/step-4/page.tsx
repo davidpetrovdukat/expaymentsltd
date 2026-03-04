@@ -114,6 +114,7 @@ const DEFAULT_PERSON: Person = {
 const R = { required: 'Required' } as const;
 
 function Step4Content() {
+    "use no memo";
     const currentStep = 4;
     const progressPercent = 60;
     const router = useRouter();

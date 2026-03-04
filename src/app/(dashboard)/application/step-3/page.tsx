@@ -43,6 +43,7 @@ interface Step3FormData {
 const R = { required: 'Required' } as const;
 
 function Step3Content() {
+    "use no memo";
     const currentStep = 3;
     const progressPercent = 40;
     const router = useRouter();
